@@ -1,8 +1,24 @@
-import { memo } from 'react';
+import {
+  memo,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentRef,
+} from 'react';
 import { Marker, Tooltip } from 'react-leaflet';
-import { divIcon, type LatLngExpression } from 'leaflet';
+import {
+  divIcon,
+  latLng,
+  type LatLngExpression,
+} from 'leaflet';
 
 import type { Vessel } from '@/types/vessel';
+
+/** Duration of the slide animation between two AIS position reports. */
+const ANIMATION_DURATION_MS = 2000;
+
+
+const SNAP_DISTANCE_METERS = 500;
 
 const icon = divIcon({
   className: 'vessel-marker',
@@ -17,16 +33,64 @@ interface VesselMarkerProps {
 
 function VesselMarkerInner({ vessel }: VesselMarkerProps) {
   const { latitude, longitude, mmsi, vesselName } = vessel;
-
   if (latitude == null || longitude == null) return null;
+  return (
+    <SlidingMarker
+      mmsi={mmsi}
+      vesselName={vesselName || 'Unknown'}
+      latitude={latitude}
+      longitude={longitude}
+    />
+  );
+}
 
-  const position: LatLngExpression = [latitude, longitude];
+interface SlidingMarkerProps {
+  mmsi: number;
+  vesselName: string;
+  latitude: number;
+  longitude: number;
+}
+
+
+function SlidingMarker({
+  mmsi,
+  vesselName,
+  latitude,
+  longitude,
+}: SlidingMarkerProps) {
+  const markerRef = useRef<ComponentRef<typeof Marker> | null>(null);
+
+  
+  const [initialPos] = useState<LatLngExpression>(() => [latitude, longitude]);
+
+  useEffect(() => {
+    const marker = markerRef.current;
+    if (!marker) return;
+
+    const to = latLng(latitude, longitude);
+    const from = marker.getLatLng();
+    const distance = from.distanceTo(to);
+
+    if (distance >= 1) {
+      if (distance >= SNAP_DISTANCE_METERS) {
+        // Large drift — snap to the new position immediately.
+        marker.setLatLng(to);
+      } else {
+        // Small drift — smooth glide over the configured duration.
+        marker.slideTo(to, { duration: ANIMATION_DURATION_MS });
+      }
+    }
+
+    return () => {
+      marker.slideCancel();
+    };
+  }, [latitude, longitude]);
 
   return (
-    <Marker position={position} icon={icon}>
+    <Marker ref={markerRef} position={initialPos} icon={icon}>
       <Tooltip direction="top" offset={[0, -8]}>
         <div className="vessel-tooltip">
-          <strong>{vesselName || 'Unknown'}</strong>
+          <strong>{vesselName}</strong>
           <br />
           MMSI: {mmsi}
           <br />
