@@ -1,5 +1,3 @@
-// This hook is used to establish a WebSocket connection to the server and manage the connection state. It uses the socket.io-client library to connect to the server and listen for connection and disconnection events.
-
 import { useEffect, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 
@@ -8,7 +6,8 @@ export function useSocket() {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const s = io('/', { transports: ['websocket', 'polling'] });
+    const url = import.meta.env.VITE_SOCKET_URL ?? 'http://localhost:3000';
+    const s = io(url);
     setSocket(s);
 
     s.on('connect', () => setIsConnected(true));

@@ -1,5 +1,3 @@
-// This hook is used to fetch and manage the state of vessels data from the server. It uses React Query for data fetching and caching, and a WebSocket connection to receive real-time updates about vessels.
-
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -30,8 +28,19 @@ export function useVessels() {
         if (!prev) return [incoming];
         const idx = prev.findIndex((v) => v.mmsi === incoming.mmsi);
         if (idx === -1) return [...prev, incoming];
+
+        const existing = prev[idx]!;
         const next = prev.slice();
-        next[idx] = incoming;
+
+        // Merge incoming data but preserve existing lat/lon when
+        // the incoming message is static data (no position)
+        next[idx] = {
+          ...existing,
+          ...incoming,
+          latitude: incoming.latitude ?? existing.latitude,
+          longitude: incoming.longitude ?? existing.longitude,
+        } as Vessel;
+
         return next;
       });
     };
