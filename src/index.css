@@ -60,3 +60,21 @@ html, body, #root {
   font-size: 0.8125rem;
   line-height: 1.5;
 }
+
+/* Top-right vessel count chip. `position: fixed` so it sits above the
+   Leaflet panes regardless of map zoom/pan/fitBounds; z-index 1000 matches
+   the upper bound of Leaflet’s control layer so it never tucks under a
+   tile. Backdrop blur keeps it readable on both light and dark tiles. */
+.vessel-count {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 1000;
+  padding: 6px 10px;
+  font-family: system-ui, sans-serif;
+  font-size: 0.875rem;
+  color: #1f2937;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}

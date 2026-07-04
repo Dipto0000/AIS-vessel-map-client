@@ -104,11 +104,13 @@ function SlidingMarker({
     <Marker ref={markerRef} position={initialPos} icon={icon}>
       <Tooltip direction="top" offset={[0, -8]}>
         <div className="vessel-tooltip">
-          <strong>{vesselName}</strong>
+          Name: {vesselName}
           <br />
           MMSI: {mmsi}
           <br />
-          {latitude.toFixed(4)}, {longitude.toFixed(4)}
+          Lat: {latitude.toFixed(4)}
+          <br />
+          Lon: {longitude.toFixed(4)}
         </div>
       </Tooltip>
     </Marker>

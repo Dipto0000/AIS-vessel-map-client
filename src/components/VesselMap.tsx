@@ -63,5 +63,6 @@ export default function VesselMap() {
       ))}
       {positioned.length > 0 && <MapBoundsFitter vessels={positioned} />}
     </MapContainer>
+    <div className="vessel-count">{positioned.length} vessels</div>
   );
 }
