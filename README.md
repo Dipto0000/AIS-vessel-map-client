@@ -7,7 +7,7 @@ This is the frontend. It shows live ship positions on a map.
 - Node.js version 18 or higher.
 - The backend running.
 
-The backend should be running on `http://localhost:3000` (the default). The client talks to it.
+The backend should be running on `http://localhost:3000` (the default). If port 3000 was taken on your machine, the server automatically tries `3001`…`3005` and logs each step — check the server's terminal to see which port it ended up on.
 
 ## Setup
 
@@ -17,7 +17,9 @@ cd ais_vessel_map_client
 npm install
 ```
 
-No `.env` needed for dev. The dev server proxies all `/api` and `/socket.io` calls to the backend on port 3000.
+No `.env` needed for dev. The dev server proxies all `/api` and `/socket.io` calls to `localhost:3000`.
+
+If you changed `PORT` on the server (because the fallback range `3000`–`3005` was all taken), create `client/.env` with one line: `VITE_SOCKET_URL=http://localhost:<YOUR_PORT>`. Without this, the proxy still points at 3000 and the map will stay blank with no clear error.
 
 ## How to run
 
@@ -79,7 +81,7 @@ The Vite dev server proxies both to `localhost:3000`. So in the code we write `f
 
 ## Common errors
 
-**Map is blank** — backend is not running, or runs on a wrong port. Check `http://localhost:3000/health`.
+**Map is blank** — backend is not running, or runs on a wrong port. Check `http://localhost:<PORT>/health` (default `3000`, but it may be `3001`…`3005` if the server's fallback kicked in — read the server terminal). If a port is taken and you want it back, run `npx kill-port 3000` from the server's folder.
 
 **"Cannot connect to socket"** — same as above. The Vite proxy forwards to the backend.
 
