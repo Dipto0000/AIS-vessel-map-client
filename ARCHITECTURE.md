@@ -132,7 +132,7 @@ Why slide: ships do not teleport. They move continuously. Without smooth slide, 
 
 **`bulkWrite`, not `updateOne`, for DB writes**
 
-A ship network sends 50-200 messages per second. Each `updateOne` call opens a socket to MongoDB, sends the query, waits for answer, closes the socket. At 200 calls per second, we run out of sockets (Mongoose has only 20). Queries queue. The server slows down and eventually freezes.
+A ship network on peak times can send 50-200 messages or even more per second. Each `updateOne` call opens a socket to MongoDB, sends the query, waits for answer, closes the socket. At 200 calls per second, we run out of sockets (Mongoose has only 20). Queries queue. The server slows down and eventually freezes.
 
 `bulkWrite` puts 200 ops into ONE call. One socket, one round trip. MongoDB handles this easily.
 
