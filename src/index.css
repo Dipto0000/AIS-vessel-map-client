@@ -16,18 +16,30 @@ html, body, #root {
   width: 100%;
 }
 
+/* Leaflet's `.leaflet-div-icon` ships with its own background and border.
+   The `!important` here overrides those defaults so only our SVG is
+   visible on the map. */
 .vessel-marker {
   background: none !important;
   border: none !important;
 }
 
-.vessel-dot {
-  width: 12px;
-  height: 12px;
-  background: #3b82f6;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+/*
+ * `color` cascades into the SVG `fill="currentColor"` so the ship can be
+ * recolored from CSS without editing the SVG string. The drop-shadow
+ * gives the silhouette a soft halo so it stays readable against both
+ * light and dark map tiles.
+ *
+ * Rotation is driven via the `rotate` CSS property by the rotation
+ * useEffect in VesselMarker.tsx; `transform-origin: center` keeps the
+ * silhouette pivoting around the marker's lat/lon rather than drifting
+ * off it, and the 0.2s `transition: rotate` smooths heading updates.
+ */
+.vessel-ship {
+  color: #3b82f6;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+  transform-origin: center;
+  transition: rotate 0.2s linear;
 }
 
 .map-placeholder {

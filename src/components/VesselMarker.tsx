@@ -17,14 +17,16 @@ import type { Vessel } from '@/types/vessel';
 /** Duration of the slide animation between two AIS position reports. */
 const ANIMATION_DURATION_MS = 2000;
 
-
+/** Snap threshold (meters) above which we move instantly rather than glide. */
 const SNAP_DISTANCE_METERS = 500;
+
+const SHIP_SVG = `<svg width="24" height="24" viewBox="-12 -12 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M 0 -11 L 4 -3 L 4 8 Q 4 11 0 11 Q -4 11 -4 8 L -4 -3 Z" fill="currentColor"/></svg>`;
 
 const icon = divIcon({
   className: 'vessel-marker',
-  html: '<div class="vessel-dot" />',
-  iconSize: [12, 12],
-  iconAnchor: [6, 6],
+  html: `<div class="vessel-ship">${SHIP_SVG}</div>`,
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
 });
 
 interface VesselMarkerProps {
@@ -32,7 +34,7 @@ interface VesselMarkerProps {
 }
 
 function VesselMarkerInner({ vessel }: VesselMarkerProps) {
-  const { latitude, longitude, mmsi, vesselName } = vessel;
+  const { latitude, longitude, mmsi, vesselName, heading } = vessel;
   if (latitude == null || longitude == null) return null;
   return (
     <SlidingMarker
@@ -40,6 +42,7 @@ function VesselMarkerInner({ vessel }: VesselMarkerProps) {
       vesselName={vesselName || 'Unknown'}
       latitude={latitude}
       longitude={longitude}
+      heading={heading ?? 0}
     />
   );
 }
@@ -49,18 +52,18 @@ interface SlidingMarkerProps {
   vesselName: string;
   latitude: number;
   longitude: number;
+  heading: number;
 }
-
 
 function SlidingMarker({
   mmsi,
   vesselName,
   latitude,
   longitude,
+  heading,
 }: SlidingMarkerProps) {
   const markerRef = useRef<ComponentRef<typeof Marker> | null>(null);
 
-  
   const [initialPos] = useState<LatLngExpression>(() => [latitude, longitude]);
 
   useEffect(() => {
@@ -73,10 +76,10 @@ function SlidingMarker({
 
     if (distance >= 1) {
       if (distance >= SNAP_DISTANCE_METERS) {
-        // Large drift — snap to the new position immediately.
+        // Large drift -- snap to the new position immediately.
         marker.setLatLng(to);
       } else {
-        // Small drift — smooth glide over the configured duration.
+        // Small drift -- smooth glide over the configured duration.
         marker.slideTo(to, { duration: ANIMATION_DURATION_MS });
       }
     }
@@ -85,6 +88,17 @@ function SlidingMarker({
       marker.slideCancel();
     };
   }, [latitude, longitude]);
+
+  useEffect(() => {
+    const marker = markerRef.current;
+    if (!marker) return;
+    const icon = marker.getElement();
+    if (!icon) return;
+    const ship = icon.querySelector<HTMLElement>('.vessel-ship');
+    if (!ship) return;
+    const safeHeading = heading > 0 && heading < 360 ? heading : 0;
+    ship.style.rotate = `${safeHeading}deg`;
+  }, [heading]);
 
   return (
     <Marker ref={markerRef} position={initialPos} icon={icon}>
