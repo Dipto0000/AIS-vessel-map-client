@@ -53,16 +53,18 @@ export default function VesselMap() {
   const positioned = vessels?.filter((v) => v.latitude != null && v.longitude != null) ?? [];
 
   return (
-    <MapContainer center={FALLBACK_CENTER} zoom={FALLBACK_ZOOM} className="vessel-map">
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {positioned.map((vessel) => (
-        <VesselMarker key={vessel.mmsi} vessel={vessel} />
-      ))}
-      {positioned.length > 0 && <MapBoundsFitter vessels={positioned} />}
-    </MapContainer>
-    <div className="vessel-count">{positioned.length} vessels</div>
+    <>
+      <MapContainer center={FALLBACK_CENTER} zoom={FALLBACK_ZOOM} className="vessel-map">
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {positioned.map((vessel) => (
+          <VesselMarker key={vessel.mmsi} vessel={vessel} />
+        ))}
+        {positioned.length > 0 && <MapBoundsFitter vessels={positioned} />}
+      </MapContainer>
+      <div className="vessel-count">{positioned.length} vessels</div>
+    </>
   );
 }
